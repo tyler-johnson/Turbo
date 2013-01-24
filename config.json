@@ -1,0 +1,23 @@
+{
+	"name": "Test App",
+	"port": 3000,
+	"mongo": {
+		"name": "test_app",
+		"username": "public_site",
+		"password": "2rusTab6swAb",
+		"host": "linus.mongohq.com",
+		"port": 10088
+	},
+	"redis": {
+		"host": "localhost",
+		"port": 6379
+	},
+	"theme": {
+		"config_file": "theme2.json",
+		"minify": false,
+		"concat": false
+	},
+	"plugins": {
+		"autoload": false
+	}
+}

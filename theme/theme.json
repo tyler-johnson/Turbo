@@ -1,0 +1,28 @@
+{
+	"name": "Awesome Test Theme",
+	"author": "Tyler Johnson",
+	"static_files": "./public",
+	"layouts": {
+		"default": {
+			"name": "Default",
+			"html": "layout.html",
+			"headers": [],
+			"styles": [ "/theme/bootstrap/css/bootstrap.min.css", "/theme/bootstrap/css/bootstrap-responsive.min.css" ],
+			"scripts": [ "http://code.jquery.com/jquery-1.8.3.min.js", "/theme/bootstrap/js/bootstrap.min.js" ]
+		}
+	},
+	"templates": {
+		"default": {
+			"name": "Default",
+			"type": "page",
+			"html": "default.html",
+			"layout": "default"
+		},
+		"error": {
+			"name": "Error",
+			"type": "error",
+			"html": "error.html",
+			"layout": "default"
+		}
+	}
+}
