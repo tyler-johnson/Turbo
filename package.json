@@ -1,6 +1,6 @@
 {
 	"name": "turbo-test",
-	"version": "0.0.1",
+	"version": "0.1.0alpha",
 	"scripts": {
 		"start": "nodemon app.js"
 	},
