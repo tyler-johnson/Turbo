@@ -10,7 +10,7 @@ This is Turbo. She ain't pretty (yet), but she'll run. This is still super alpha
 
 Well, I'm not sure, I just made it up, sort of (Drupal uses that terminology too). Essentially, this is a "faceless" foundation for running dynamic websites. What do I mean by dynamic? Blogs, e-commerce, information sites, anything that has changing data.
 
-At it's core, Turbo is really just a Theme, which converts files into something that can be sent the browser, and a Router, which takes incoming requests, retrieves associated data, and passes it along. Using plugins, you can access these major components and control how the data is displayed (in theory).
+At it's core, Turbo is really just a Theme, which converts files into something that can be sent the browser, and a Router, which takes incoming requests, retrieves associated data, and passes it along. Using plugins, you can access these major components and control how the data is displayed (in theory). The neat part is that these two elements are completely seperate; each can be run without the other. This causes the need for some weird fajangles (see [connect.js](https://github.com/appleifreak/Turbo/blob/master/lib/connect.js)), but overall it allows for a smooth (modular?) ride.
 
 ### Should I use this?
 
@@ -18,7 +18,7 @@ Sure, just only for testing; no "live" environments. As I said above, it's in AL
 
 ### Where is the documentation?!
 
-Coming soon. I'm the only one working on this right now and I have not had time to write it out. The code is *decently* commented, so you should be able to get the gist of what's going on. I am definitely here to help via email so don't hesitate.
+Coming soon. I'm the only one working on this right now and I have not had time to write it out. The code is *decently* commented, so you should be able to get the gist of what's going on. I am definitely here to help so don't hesitate to [contact me](tyler@vintyge.com).
 
 ### What is the plan for developing this thing?
 
@@ -28,7 +28,7 @@ Besides that, I will continue to work on this for the foreseeable future. This i
 
 ### Who is maintaining this?
 
-This repo is maintained by me (…obviously), Tyler Johnson ([@appleifreak](http://github.com/appleifreak), <tyler@vintyge.com>). I am the lead developer and co-owner of [Vintyge, Inc.](http://vintyge.com), a small creative web firm. This is our first foray into the world of open source libraries. If you have any questions, concerns, thoughts, dilemmas or really anything, please contact me: <tyler@vintyge.com>.
+This repo is maintained by me (…obviously), Tyler Johnson ([@appleifreak](http://github.com/appleifreak), <tyler@vintyge.com>). I am the lead developer and co-owner of [Vintyge, Inc.](http://vintyge.com), a small creative web firm. This is our first foray into the world of open source. If you have any questions, concerns, thoughts, dilemmas or really anything, please contact me: <tyler@vintyge.com>.
 
 ## MIT License
 
