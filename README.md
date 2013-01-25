@@ -10,17 +10,38 @@ This is Turbo. She ain't pretty (yet), but she'll run. This is still super alpha
 
 Well, I'm not sure, I just made it up, sort of (Drupal uses that terminology too). Essentially, this is a "faceless" foundation for running dynamic websites. What do I mean by dynamic? Blogs, e-commerce, information sites, anything that has changing data.
 
-At it's core, Turbo is really just a Theme, which converts files into something that can be sent the browser, and a Router, which takes incoming requests, retrieves associated data, and passes it along. Using plugins, you can access these major components and control how the data is displayed (in theory). The neat part is that these two elements are completely seperate; each can be run without the other. This causes the need for some weird fajangles (see [connect.js](https://github.com/appleifreak/Turbo/blob/master/lib/connect.js)), but overall it allows for a smooth (modular?) ride.
+At it's core, Turbo is really just a Theme, which converts files into something that can be sent to the browser, and a Router, which takes incoming requests, retrieves associated data, and passes it along. Using plugins, you can access these major components and combine them to control how the data will be displayed (in theory). The neat part is that these two elements are completely seperate; each can be run without the other. This causes the need for some weird fajangles (see [connect.js](http://github.com/appleifreak/Turbo/blob/master/lib/connect.js)), but overall it allows for a smooth (modular?) ride.
 
 ### Should I use this?
 
 Sure, just only for testing; no "live" environments. As I said above, it's in ALPHA. You can expect this API to change dramatically between now and the first stable build.
 
+### How do I get this to run?
+
+First, obviously, run `npm install` to get all the dependencies installed.
+
+Take a look at [example.config.json](https://github.com/appleifreak/Turbo/blob/master/example.config.json) for an example configuration file. Make changes to it (specifically the Mongo and Redis connection data) and change it's name to `config.json`. Running a quick `node app.js` should boot it successfully.
+
+At this point, anything you try to type into you browser will probably return a 404 because you don't have any content set up. Create a collection in your mongo database named `routes` and add a document with following format:
+
+	{
+		type: "page",
+		handle: "/my-page",
+		data: {
+			title: "My New Page",
+			content: "<p>This is some page content.</p>"
+		}
+	}
+	
+`type` and `handle` should both be strings. They are both used by the Router to determine where to send a request. The `data` object can actually be anything. It is attached to the route so something else down the line can use it.
+
+Try `localhost:3000/my-page` in your browser to view the route. At this point, Turbo should be running like a website.
+
 ### Where is the documentation?!
 
 Coming soon. I'm the only one working on this right now and I have not had time to write it out. The code is *decently* commented, so you should be able to get the gist of what's going on. I am definitely here to help so don't hesitate to [contact me](tyler@vintyge.com).
 
-### What is the plan for developing this thing?
+### What is the plan for development?
 
 I have several clients "dieing" to use this thing, so immediately an admin (aka the actual CMS portion) plugin should become available. This will give the "faceless" foundation a face my customers can use to make changes to their site. This will actually become something of beast as it too will have an API for other plugins to use.
 

@@ -1,28 +1,35 @@
 {
 	"name": "Awesome Test Theme",
 	"author": "Tyler Johnson",
-	"static_files": "./public",
+	"options": {
+		"static_assets": false,
+		"default_asset_type": "static",
+		"static_files": "./public"
+	},
 	"layouts": {
 		"default": {
 			"name": "Default",
-			"html": "layout.html",
-			"headers": [],
-			"styles": [ "/theme/bootstrap/css/bootstrap.min.css", "/theme/bootstrap/css/bootstrap-responsive.min.css" ],
-			"scripts": [ "http://code.jquery.com/jquery-1.8.3.min.js", "/theme/bootstrap/js/bootstrap.min.js" ]
+			"content": {
+				"before": "header.hbr",
+				"after": "footer.hbr"
+			},
+			"headers": "<!-- Test Header -->",
+			"styles": [ "bootstrap", "bootstrap-responsive" ],
+			"scripts": [ "jquery", "bootstrap-js" ]
 		}
 	},
 	"templates": {
 		"default": {
 			"name": "Default",
 			"type": "page",
-			"html": "default.html",
-			"layout": "default"
+			"layout": "default",
+			"content": { "file": "default.html", "type": "handlebar" }
 		},
 		"error": {
 			"name": "Error",
 			"type": "error",
-			"html": "error.html",
-			"layout": "default"
+			"layout": "default",
+			"content": { "file": "error.html", "type": "handlebar" }
 		}
 	}
 }
