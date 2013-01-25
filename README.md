@@ -2,8 +2,6 @@
 
 This is Turbo. She ain't pretty (yet), but she'll run. This is still super alpha, so don't expect any fireworks. Here's what you'll need to get her running: Mongo, Redis, and Node. This page will be updated as frequently as I can get to it. Feel free to play around and tell me what you think.
 
-
-
 ## FAQ
 
 ### What is a Content Management Platform?
@@ -39,7 +37,7 @@ Try `localhost:3000/my-page` in your browser to view the route. At this point, T
 
 ### Where is the documentation?!
 
-Coming soon. I'm the only one working on this right now and I have not had time to write it out. The code is *decently* commented, so you should be able to get the gist of what's going on. I am definitely here to help so don't hesitate to [contact me](tyler@vintyge.com).
+Coming soon. I'm the only one working on this right now and I have not had time to write it out. The code is *decently* commented, so you should be able to get the gist of what's going on. I am definitely here to help so don't hesitate to [contact me](mailto:tyler@vintyge.com).
 
 ### What is the plan for development?
 
