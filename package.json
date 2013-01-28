@@ -1,7 +1,14 @@
 {
 	"name": "turbo",
+	"author": "Tyler Johnson <tyler@vintyge.com> (http://vintyge.com)",
+	"description": "A content management platform built on Node.",
+	"homepage": "http://github.com/appleifreak/Turbo",
 	"version": "0.2.0alpha",
-	"main": "turbo.js",
+	"main": "./turbo.js",
+	"repository": {
+		"type" : "git",
+		"url" : "http://github.com/appleifreak/Turbo.git"
+	},
 	"dependencies": {
 		"express": "3.0.0",
 		"connect": "2.7.1",
@@ -15,5 +22,9 @@
 		"request": "2.12.0",
 		"mime": "1.2.8",
 		"sqwish": "0.2.1"
+	},
+	"engines": {
+		"node": "0.8.x",
+		"npm": "1.1.x"
 	}
 }
