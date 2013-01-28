@@ -2,13 +2,15 @@
 
 This is Turbo. She ain't pretty (yet), but she'll run. This is still super alpha, so don't expect any fireworks. Here's what you'll need to get her running: Mongo, Redis, and Node. This page will be updated as frequently as I can get to it. Feel free to play around and tell me what you think.
 
+If you want to see an example of Turbo in action, check out [turbo-example](https://github.com/appleifreak/turbo-example).
+
 ## FAQ
 
 ### What is a Content Management Platform?
 
 Well, I'm not sure, I just made it up, sort of (Drupal uses that terminology too). Essentially, this is a "faceless" foundation for running dynamic websites. What do I mean by dynamic? Blogs, e-commerce, information sites, anything that has changing data.
 
-At it's core, Turbo is really just a Theme, which converts files into something that can be sent to the browser, and a Router, which takes incoming requests, retrieves associated data, and passes it along. Using plugins, you can access these major components and combine them to control how the data will be displayed (in theory). The neat part is that these two elements are completely seperate; each can be run without the other. This causes the need for some weird fajangles (see [connect.js](http://github.com/appleifreak/Turbo/blob/master/lib/connect.js)), but overall it allows for a smooth (modular?) ride.
+At it's core, Turbo is really just a Theme, which converts files into something that can be sent to the browser, and a Router, which takes incoming requests, retrieves associated data, and passes it along. Using plugins, you can access these major components and combine them to control how the data will be displayed (in theory). The neat part is that these two elements are completely seperate; each can be run without the other. This causes the need for some weird fajangles (see [connect.js](https://github.com/appleifreak/Turbo/blob/master/connect.js)), but overall it allows for a smooth (modular?) ride.
 
 ### Should I use this?
 
@@ -16,9 +18,9 @@ Sure, just only for testing; no "live" environments. As I said above, it's in AL
 
 ### How do I get this to run?
 
-First, obviously, run `npm install` to get all the dependencies installed.
+Well it's a setup to be a node module, but it hasn't been added to the NPM registry yet. Add `"turbo": "git://github.com/appleifreak/Turbo.git"` to your `package.json` or run `npm install git://github.com/appleifreak/Turbo.git` in the app folder.
 
-Take a look at [example.config.json](https://github.com/appleifreak/Turbo/blob/master/example.config.json) for an example configuration file. Make changes to it (specifically the Mongo and Redis connection data) and change it's name to `config.json`. Running a quick `node app.js` should boot it successfully.
+In your main javascript file, you can now run `var Turbo = require('turbo')` to create a fresh a Turbo instance and return it. Turbo will not be running at this point. You will have to let it know where major system paths are (theme, plugins, config.json) and then run `Turbo.liftoff()`. For an example of *exactly* how Turbo should be set up, see [turbo-example](https://github.com/appleifreak/turbo-example).
 
 At this point, anything you try to type into you browser will probably return a 404 because you don't have any content set up. Create a collection in your mongo database named `routes` and add a document with following format:
 
@@ -33,7 +35,7 @@ At this point, anything you try to type into you browser will probably return a 
 	
 `type` and `handle` should both be strings. They are both used by the Router to determine where to send a request. The `data` object can actually be anything. It is attached to the route so something else down the line can use it.
 
-Try `localhost:3000/my-page` in your browser to view the route. At this point, Turbo should be running like a website.
+Try `localhost:3000/my-page` in your browser to view the route. Turbo should now be running like a website.
 
 ### Where is the documentation?!
 
