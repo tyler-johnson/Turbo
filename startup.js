@@ -14,12 +14,6 @@ var Turbo = require('./turbo'),
 // Go!
 module.exports = (function() {
 	return function(callback) {
-		// Load the config first
-		Turbo.config = new Config(Turbo.defaults().SYSTEM_PATHS.CONFIG);
-
-		// TESTS
-		// END TESTS
-
 		// Load the mongo database
 		var mgd = Turbo.config.get("mongo");
 		mongoose.connect("mongodb://"+mgd.username+":"+mgd.password+"@"+mgd.host+":"+mgd.port+"/"+mgd.name);

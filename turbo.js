@@ -1,5 +1,6 @@
 var _ = require('underscore'),
-	promise = require('fibers-promise');
+	promise = require('fibers-promise'),
+	Config = require('./config');
 
 // Super protected
 var defaults = {
@@ -60,6 +61,9 @@ var Turbo = (function() {
 		// Set some basic ones
 		if (defaults.ENVIRONMENT) process.env.NODE_ENV = defaults.ENVIRONMENT;
 		this.PATHS = options.SYSTEM_PATHS;
+
+		// Load the config
+		this.config = new Config(this.PATHS.CONFIG);
 	});
 
 	Turbo.prototype.defaults = function() {
