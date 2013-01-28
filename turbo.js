@@ -6,7 +6,7 @@ var defaults = {
 	ENVIRONMENT: ["string", "development"],
 	SYSTEM_PATHS: {
 		APP: ["string", null, true],
-		LIBRARY: ["string", null, true],
+		LIBRARY: ["string", __dirname],
 		CONFIG: ["string", null, true],
 		THEME: ["string", null, true],
 		PLUGINS: ["string", null, true],

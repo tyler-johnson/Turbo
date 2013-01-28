@@ -1,25 +1,19 @@
 {
 	"name": "turbo-test",
 	"version": "0.1.0alpha",
-	"scripts": {
-		"start": "nodemon app.js"
-	},
+	"main": "turbo.js",
 	"dependencies": {
 		"express": "3.0.0",
 		"connect": "2.7.1",
-		"jade": "*",
-		"fibers-promise": "0.0.3",
+		"fibers-promise": "git://github.com/lm1/node-fibers-promise.git",
 		"underscore": "1.4.3",
 		"sugar": "1.3.7",
 		"uglify-js": "2.2.2",
-		"handlebars": "1.0.7",
-		"mongoose": "1.2.5",
+		"mongoose": "3.5.4",
 		"hiredis": "0.1.14",
 		"redis": "0.8.2",
 		"request": "2.12.0",
 		"mime": "1.2.8",
-		"sqwish": "0.2.1",
-		"less": "1.3.3",
-		"contextify": "0.1.3"
+		"sqwish": "0.2.1"
 	}
 }
