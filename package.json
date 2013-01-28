@@ -1,6 +1,6 @@
 {
-	"name": "turbo-test",
-	"version": "0.1.0alpha",
+	"name": "turbo",
+	"version": "0.2.0alpha",
 	"main": "turbo.js",
 	"dependencies": {
 		"express": "3.0.0",
