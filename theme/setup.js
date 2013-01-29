@@ -29,6 +29,8 @@ var theme_setup = function() {
 	this.register_asset_type("html", [ "html", "htm" ]);
 	this.register_asset_type("text", "txt");
 	this.register_asset_type("image", [ "png", "gif", "jpg", "jpeg" ]);
+	this.register_asset_type("font", [ "ttf", "woff", "eot" ]);
+	this.register_asset_type("svg", "svg");
 	
 	// Handlebar
 	var Handlebars = require('handlebars');
