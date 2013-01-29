@@ -3,7 +3,7 @@
 	"author": "Tyler Johnson <tyler@vintyge.com> (http://vintyge.com)",
 	"description": "A content management platform built on Node.",
 	"homepage": "http://github.com/appleifreak/Turbo",
-	"version": "0.2.0alpha",
+	"version": "0.2.1alpha",
 	"main": "./turbo.js",
 	"repository": {
 		"type" : "git",
