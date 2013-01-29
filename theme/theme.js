@@ -280,8 +280,8 @@ var Theme = EventClass.$extend({
 	
 	// Create an asset from a file in the "static" directory
 	new_static_asset: function(route) {
-		var route = path.resolve(this.location, this.options.static_files, route);
-		return fs.existsSync(route) ? this.new_asset(route) : null;
+		var base = path.resolve(this.location, this.options.static_files);
+		return fs.existsSync(path.resolve(base, route)) ? this.new_asset(route, base) : null;
 	},
 	
 	// "Internal" Methods 
