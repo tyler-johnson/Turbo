@@ -187,9 +187,9 @@ var Theme = EventClass.$extend({
 			template_name = null;
 		}
 		
-		// First test the template
-		try { return this.new_layout(template_name, options); }
-		catch (e) { }
+		// First test the template name
+		if (this.config.get("templates", template_name))
+			return this.new_layout(template_name, options);
 		
 		// Next, search through templates to locate a good type
 		var templates = this.config.get("templates"),
@@ -206,7 +206,7 @@ var Theme = EventClass.$extend({
 	},
 	
 	// Take a string or object and returns an asset
-	new_asset: function(asset, base_path) {
+	new_asset: function(asset, base_path, deps) {
 		var ext, file, filename, type, uri, global;
 		
 		// Set the "relative too" path if it isn't set
@@ -217,11 +217,19 @@ var Theme = EventClass.$extend({
 		
 		// Now let's see if the asset is really an ID to a global asset
 		if (_.isString(asset)) global = this.global_assets.get(asset);
+		else if (_.isObject(asset) && _.has(asset, "id")) global = this.global_assets.get(asset.id);
 		// Do a small recursion to get the correct data
-		if (global) return this.new_asset(global, path.resolve(__dirname, "assets"));
+		if (global) return this.new_asset(_.clone(global), path.resolve(__dirname, "assets"), deps);
 		
 		// If it's not a global, do normal stuff
-		// First find and parse the url
+		// First let's load any dependencies
+		if (_.isObject(asset) && _.has(asset, "deps") && _.isArray(deps)) {
+			_.each(asset.deps, _.bind(function(dep) {
+				deps.push(this.new_asset(dep, base_path, deps));
+			}, this));
+		}
+		
+		// Find and parse the url
 		if (_.isString(asset)) filename = asset;
 		else if (_.isObject(asset) && _.has(asset, "file")) filename = asset.file;
 		if (filename) uri = url.parse(filename);
@@ -301,8 +309,8 @@ var Theme = EventClass.$extend({
 		// Validate assets; make sure they aren't falsy
 		if (!assets) throw new Error("Incorrect argument type for assets.");
 		
-		var before = [], b = [],
-			after = [], a = [],
+		var before = [], b = [], bdeps = [],
+			after = [], a = [], adeps = [],
 			self = this;
 		
 		// Test for a layout object
@@ -320,8 +328,11 @@ var Theme = EventClass.$extend({
 		if (!_.isArray(after)) after = [ after ];
 		
 		// Now lets make some asset objects
-		_.each(before, function(item) { b.push(self.new_asset(item)); });
-		_.each(after, function(item) { a.push(self.new_asset(item)); });
+		_.each(before, function(item) { b.push(self.new_asset(item, null, bdeps)); });
+		b = _.union(bdeps, b);
+		
+		_.each(after, function(item) { a.push(self.new_asset(item, null, adeps)); });
+		a = _.union(adeps, a);
 		
 		if (is_layout) return [ b, a ];
 		else return b;

@@ -43,7 +43,7 @@ theme.on("new_layout", function(layout) {
 	layout.on("state_change", function(state, old) {
 		// Changed to ready state from preparing? let's cache
 		if (old === "preparing" && state === "ready") {
-			var groups = { "scripts": [ "javascript" ], "styles": [ "css" ] },
+			var groups = { "scripts": [ "javascript" ], "styles": [ "css", "image", "font", "svg" ] },
 				self = this;
 	
 			_.each(groups, function(types, group) {

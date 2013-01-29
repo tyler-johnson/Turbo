@@ -281,7 +281,8 @@ var theme_setup = function() {
 		// Styles
 		context.styles = _.size(rendered.styles) ? util.asset_html(rendered.styles, {
 			src_format: "<link rel=\"stylesheet\" href=\"{src}\" type=\"text/css\"/>\n",
-			public_url: _.isFunction(this.public_url) ? this.public_url : null
+			public_url: _.isFunction(this.public_url) ? this.public_url : null,
+			match: function(asset) { return asset.type === "css" }
 		}) : "";
 		
 		// Scripts

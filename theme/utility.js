@@ -142,11 +142,18 @@ module.exports.asset_html = function(assets, options) {
 		embed: false,
 		embed_format: "{content}\n",
 		src_format: "{src}\n",
-		public_url: function(asset) { return path.join( "/assets", asset.name ); }
+		public_url: function(asset) { return path.join( "/assets", asset.name ); },
+		match: function(asset) { return true; }
 	});
 			
 	_.each(assets, function(asset) {
-		var content = asset.toString();
+		var content = asset.toString(),
+			test = true;
+		
+		// First "match" the asset
+		if (_.isFunction(options.match)) test = options.match.call(null, asset);
+		else if (_.isRegExp(options.match)) test = asset.file.match(match);
+		if (!test) return;
 		
 		// Check if we should embed or not
 		if (asset.type !== "static" && options.embed && content)

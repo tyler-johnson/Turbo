@@ -2,9 +2,18 @@
 	"jquery": "jquery/jquery-1.9.0.js",
 	"jquery-1.8.3": "jquery/jquery-1.8.3.js",
 	
-	"bootstrap": "bootstrap/css/bootstrap.css",
+	"bootstrap": {
+		"file": "bootstrap/css/bootstrap.css",
+		"deps": [ "bootstrap/img/glyphicons-halflings.png",
+			"bootstrap/img/glyphicons-halflings-white.png" ] },
+			
 	"bootstrap-responsive": "bootstrap/css/bootstrap-responsive.css",
 	"bootstrap-js": "bootstrap/js/bootstrap.js",
-	"bootstrap-less": "bootstrap/less/bootstrap.less",
+	
+	"bootstrap-less": {
+		"file": "bootstrap/less/bootstrap.less",
+		"deps": [ "bootstrap/img/glyphicons-halflings.png",
+			"bootstrap/img/glyphicons-halflings-white.png" ] },
+			
 	"bootstrap-responsive-less": "bootstrap/less/responsive.less"
 }
