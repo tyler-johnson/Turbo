@@ -101,10 +101,10 @@ router.register_system_route('/assets/*', function(req, res) {
 		if (_.has(statics, route)) asset = statics[route];
 		
 		// Next see if the theme has it "statically"
-		else asset = test.new_static_asset(route);
+		else asset = theme.new_static_asset(route);
 		
 		if (asset instanceof Asset) {
-			var content = asset.toString(),
+			var content = asset.toBuffer(),
 				type = mime.lookup(asset.name);
 		
 			// First have the router cache it so it loads super fast

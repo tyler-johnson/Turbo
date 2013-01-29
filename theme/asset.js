@@ -70,19 +70,20 @@ var Asset = Class.$extend({
 			file: this.file,
 			name: this.name,
 			location: this.location,
-			content: this.toString(),
+			content: this._get(),
 			options: this.options
 		};
 		
 		return _.omit(obj, _.toArray(arguments));
 	},
 	
-	toString: function() {
-		if (!this.location) return "";
-		
-		var p = promise.t();
-		this.cache.get(this.cache_path(), p);
-		return p.get() || "";
+	toBuffer: function() {
+		return this._get();	
+	},
+	
+	toString: function(encoding) {
+		if (!encoding) encoding = 'utf8';
+		return this._get().toString(encoding);
 	},
 	
 	clone: function() {
@@ -181,11 +182,10 @@ var Asset = Class.$extend({
 			else content = res[1]; // ...and set the content
 	
 		// File is local and exists; use that
-		} else if (fs.existsSync(this.file) && fs.statSync(this.file).isFile())
-			content = fs.readFileSync(this.file).toString();
+		} else if (fs.existsSync(this.file) && fs.statSync(this.file).isFile()) content = fs.readFileSync(this.file);
 			
 		// Otherwise wtf is this file thing?
-		else throw new Error("Asset file path is invalid or doesn't exist.");
+		else throw new Error("Asset file path `"+this.file+"` is invalid or doesn't exist.");
 		
 		return content;
 	},
@@ -196,16 +196,20 @@ var Asset = Class.$extend({
 		var p = promise.t(), set;
 		
 		// Validate
-		if (!_.isString(content)) throw new Error("Content must be a string.");
+		if (_.isString(content)) content = new Buffer(content);
+		if (!Buffer.isBuffer(content)) throw new Error("Content should be a buffer or string.");
+		
+		// Append if need be
+		if (mode === "append") content = Buffer.concat([this._get(), content]);
+		
+		// Convert
+		content = content.toString("base64");
 		
 		// Now get the right function
 		switch(mode) {
+			case "append":
 			case "overwrite":
 				set = this.cache.set;
-				break;
-			
-			case "append":
-				set = this.cache.append;
 				break;
 			
 			case "safe":
@@ -217,6 +221,15 @@ var Asset = Class.$extend({
 		// Set it!
 		set.call(this.cache, this.cache_path(), content, p);
 		return p.get() ? true : false;
+	},
+	
+	// Loads the content from the cache
+	_get: function() {
+		if (!this.location) return new Buffer("");
+		
+		var p = promise.t();
+		this.cache.get(this.cache_path(), p);
+		return new Buffer(p.get() || "", "base64");
 	}
 	
 });

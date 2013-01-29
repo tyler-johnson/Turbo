@@ -222,7 +222,10 @@ var Router = EventClass.$extend({
 		
 		// Validate
 		if (!_.isString(route)) throw new Error("Route should be a string.");
-		if (!_.isString(content)) throw new Error("Content should be a string.");
+		
+		if (_.isString(content)) content = new Buffer(content);
+		if (!Buffer.isBuffer(content)) throw new Error("Content should be a buffer or string.");
+		
 		if (_.isNumber(headers)) {
 			expires = headers;
 			headers = {};
@@ -233,7 +236,7 @@ var Router = EventClass.$extend({
 		
 		// Create a cache info
 		var location = this.build_cache_location(route),
-			data = _.chain({}).extend(headers, { content: content }).map(function(val, key) {
+			data = _.chain({}).extend(headers, { content: content.toString('base64') }).map(function(val, key) {
 				return [key, val];
 			}).flatten().value();
 		
@@ -261,7 +264,7 @@ var Router = EventClass.$extend({
 		var data = p.get();
 		
 		if (data) {
-			var content = _.has(data, "content") ? data.content : "",
+			var content = _.has(data, "content") ? new Buffer(data.content, "base64") : "",
 				headers = _.omit(data, "content");
 			
 			return { content: content, headers: headers };

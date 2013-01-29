@@ -25,9 +25,10 @@ var theme_setup = function() {
 	 * Theme file extensions and prefilters
 	 */
 	
-	// HTML & Text; Don't need a filter fnc because they don't process anything 
+	// HTML, Text, Images; Don't need a filter fnc because they don't process anything 
 	this.register_asset_type("html", [ "html", "htm" ]);
 	this.register_asset_type("text", "txt");
+	this.register_asset_type("image", [ "png", "gif", "jpg", "jpeg" ]);
 	
 	// Handlebar
 	var Handlebars = require('handlebars');
