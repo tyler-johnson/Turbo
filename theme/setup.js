@@ -304,22 +304,6 @@ var theme_setup = function() {
 		// Return
 		return compiled;
 	});
-	
-	/*
-	 * Theme global assets
-	 */
-	 
-	/*// Load the file
-	var globals = JSON.parse(fs.readFileSync(path.resolve(__dirname, "./assets/globals.json")));
-	
-	// Loop through json file
-	_.each(globals, _.bind(function(item, id) {
-		// Process the item as an asset
-		var asset = this.new_asset(item, path.resolve(__dirname, "assets"));
-		
-		// Add it to the theme
-		this.add_global_asset(id, asset);
-	}, this));*/
 }
 
 // Bind and execute
