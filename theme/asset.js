@@ -171,8 +171,6 @@ var Asset = Class.$extend({
 		var p = promise.t(),
 			uri = url.parse(this.file),
 			content;
-			
-		//console.log(this.file);
 		
 		// File is remote; retrieve it
 		if (_.has(uri, "host") && _.has(uri, "protocol")) {
