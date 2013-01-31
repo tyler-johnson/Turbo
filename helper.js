@@ -1,9 +1,13 @@
 /**
+@module Turbo
+**/
+
+/**
 Provides Turbo with general helper functions. All methods are attached directly to `module.exports`.
 
 	var helper = require('turbo/helper');
 
-@class helper
+@class Helper
 **/
 
 /* Major Dependencies */
@@ -16,7 +20,8 @@ var // None
 	sugar = require('sugar'),
 	
 	// Specific
-	promise = require('fibers-promise');
+	promise = require('fibers-promise'),
+	uuid = require('node-uuid');
 
 /**
 Parses `options` according to `rules` and returns an adjusted copy.
@@ -111,35 +116,22 @@ var rand_hex = module.exports.rand_hex = function( n ) {
 }
 
 /**
-Generates a new unique identifier. Holds a cache to gaurantee uniqueness. This should only be used for uuid that can be lost on server stop because the cache may be cleared on start.
+Generates a new RFC4122 v4 universally unique identifier. Internally uses [node-uuid](https://github.com/broofa/node-uuid/).
 
 @method generate_uuid
 
 @return {String} A universly unique string of 32 character long.
 **/
 var generate_uuid = module.exports.generate_uuid = function() {
-	var p = promise.t(),
-		Turbo = require('./turbo'),
-		cache = Turbo.redis,
-		uuid = rand_hex(32),
-		valid = false;
-	
-	while (!valid) {
-		cache.sismember("__turbo::uuids", uuid, p);
-		if (p.get()) uuid = rand_hex(32);
-		else valid = true;
-	}
-	
-	cache.sadd("__turbo::uuids", uuid, p);
-	return p.get() ? uuid : false;
+	return uuid.v4();
 }
 
 /**
-Takes a string or array of strings and converts it into a usable path.
+Takes a string or array of strings and converts it into a usable path. The inverse of this method is `helper.depatherize()`.
 
 @method patherize
 
-@param {Array|String} segments An array of segments to join together into a path. If a string is given, it is first run through the inverse of this function: `depatherize()`.
+@param {Array|String} segments An array of segments to join together into a path. If a string is given, it is first processed with `helper.depatherize()`.
 @param {Object|String} options If options is an Object, it is used in place of the defaults. If a string is given, this method will search for it in a set of preset option keys. Currently, there are three presets: `cache`, `file`, and `url`.
 	@param {String} [options.sep=/] A string to seperate segments by.
 	@param {Boolean} [options.root=true] Include a seperator at the beginning of the path.
@@ -208,7 +200,7 @@ var patherize = module.exports.patherize = function( segments, options ) {
 }
 
 /**
-Takes a string and seperates it into an array of segments. The inverse of this method is [patherize()]({{#crossLinkRaw "Helper/patherize:method"}}{{/crossLinkRaw}})
+Takes a string and seperates it into an array of segments. The inverse of this method is `helper.patherize()`.
 
 @method depatherize
 

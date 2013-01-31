@@ -8,7 +8,7 @@
         "attributesEmit": "false",
         "selleck": "false",
         "ignorePaths": [ "node_modules", "docs" ],
-        "exclude": "theme/assets, startup.js, connect.js",
+        "exclude": "theme/assets, startup.js, connect.js, theme/index.js, theme/setup.js",
         "paths": "*/js",
         "outdir": "./docs"
     }

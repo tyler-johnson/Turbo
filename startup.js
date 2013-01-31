@@ -3,17 +3,21 @@ This file loads everything into the main Turbo instance.
 It also prepares Turbo for shutdown.
 */
 
-// Load some major dependencies
-var express = require('express'),
+/* Major dependencies */
+
+	// Node
+var path = require('path'),
+	http = require('http'),
+
+	// JS Extensions
+	_ = require('underscore'),
+	
+	// Specific
+	express = require('express'),
 	promise = require('fibers-promise'),
 	mongoose = require('mongoose'),
 	redis = require('redis'),
-	path = require('path'),
-	http = require('http'),
-	_ = require('underscore');
-
-// Internal Dependencies
-var Turbo = require('./turbo'),
+	Turbo = require('./turbo'),
 	Config = require('./config');
 
 // Go!
