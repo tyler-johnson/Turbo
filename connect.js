@@ -1,11 +1,9 @@
 /*
- * Connects the router and theme for Turbo setup
- * Setup similar to a plugin.
- */
+Connects the router and theme for Turbo setup.
+Setup similar to a plugin.
+*/
 
-/**
- * Major dependencies
- */
+/* Major dependencies */
 
 	// Node
 var path = require('path'),
@@ -21,9 +19,7 @@ var path = require('path'),
 	Asset = require('./theme/asset'),
 	mime = require('mime');
 
-/**
- * Let's do some setup!
- */
+/* Let's do some setup! */
 
 // Fresh Theme instance
 var theme = new Theme(Turbo.defaults().SYSTEM_PATHS.THEME, Turbo.config.get("theme"));

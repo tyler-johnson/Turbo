@@ -1,8 +1,26 @@
-var _ = require('underscore'),
+/**
+Responsible for handling the core of Turbo.
+
+@module Turbo
+@main Turbo
+**/
+
+/*  Major Dependencies */
+
+	// Node
+var // None
+
+	// JS Extensions
+	_ = require('underscore'),
+	classy = require("./classy"),
+	Class = classy.Class,
+	
+	// Specific
 	promise = require('fibers-promise'),
+	helper = require('./helper'),
 	Config = require('./config');
 
-// Super protected
+/* Super Protected Configuration Setup */
 var defaults = {
 	ENVIRONMENT: ["string", "development"],
 	SYSTEM_PATHS: {
@@ -14,64 +32,66 @@ var defaults = {
 	}
 };
 
-var parse_options = function(options, def) {
+var configuration = {};
 
-	if (typeof options !== "object") throw new Error("Invalid options argument.");
+/**
+The main Turbo class. Manages literally *everything*.
 
-	_.each(def, function(item, key) {
-		
-		// Array? Then it wants to set up.
-		if (item instanceof Array && item.length >= 2) {
+	var Turbo = require('turbo');
 
-			// Check if options has the key and is the right type
-			if (_.has(options, key) && typeof options[key] === item[0]) {
+@class Turbo
+**/
+var Turbo = Class.$extend({
 
-				// Replace the default
-				def[key] = options[key];
-
-			// Check if the third parameter is true -> get out
-			} else if (item[2] === true) throw new Error("Option `"+key+"` is not the right type.");
-			else {
-
-				// Load the default
-				def[key] = item[1];
-
+	/**
+	Sets Turbo's initial, base configuration. This includes things like the envirnoment type and base system paths. This function can only be executed once to protect the base options. 
+	
+	@method set_options
+	@param {Object} options
+	@example
+		Turbo.set_options({
+			ENVIRONMENT: "development",
+			SYSTEM_PATHS: {
+				APP: __dirname,
+				CONFIG: path.join(__dirname, "./config.json"),
+				THEME: path.join(__dirname, "./theme/"),
+				PLUGINS: path.join(__dirname, "./plugins/"),
 			}
-
-		// Otherwise its an object of more keys
-		} else if (typeof def[key] === "object" && typeof options[key] === "object") parse_options(options[key], def[key]);
-
-		// Not an object? Get outta here.
-		else throw new Error("Invalid default.");
-
-	});
-
-}
-
-var Turbo = (function() {
-
-	function Turbo() {
-		return this;
-	}
-
-	Turbo.prototype.set_options = _.once(function(options) {
+		});
+	**/
+	set_options: _.once(function(options) {
 		// Parse and set options
-		parse_options(options, defaults);
-
+		configuration = helper.parse_options(options, defaults);
+		
 		// Set some basic ones
-		if (defaults.ENVIRONMENT) process.env.NODE_ENV = defaults.ENVIRONMENT;
-		this.PATHS = options.SYSTEM_PATHS;
-
+		if (configuration.ENVIRONMENT) process.env.NODE_ENV = configuration.ENVIRONMENT;
+		this.PATHS = configuration.SYSTEM_PATHS;
+	
 		// Load the config
 		this.config = new Config(this.PATHS.CONFIG);
-	});
-
-	Turbo.prototype.defaults = function() {
+	}),
+	
+	/**
+	Retrieves a copy of the base configuration.
+	
+	@method defaults
+	**/
+	defaults: function() {
 		// Clone to protect
-		return _.clone(defaults);
-	}
-
-	Turbo.prototype.liftoff = function(callback) {
+		return _.clone(configuration);
+	},
+	
+	/**
+	Starts Turbo's main engines. Loads up everything from the database to the Theme engine.
+	
+	@method liftoff
+	@param {Function} [callback] A function to call when Turbo has successfully left the ground (ie launched).
+	@example
+		Turbo.liftoff(function(err) {
+			console.log("We have lift off on port " + Turbo.config.get('port') + ".");
+		});
+	**/
+	liftoff: function(callback) {
 		// Make everything run in a Fiber
 		promise.start(function() {
 			// Run startup
@@ -79,8 +99,7 @@ var Turbo = (function() {
 		});
 	}
 
-	return Turbo;
+});
 
-})();
-
+// Return a single instance to be used everywhere
 module.exports = new Turbo();

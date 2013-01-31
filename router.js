@@ -1,6 +1,8 @@
 /**
- * Major dependencies
- */
+@module Router
+**/
+
+/* Major Dependencies */
 
 	// Node
 var fs = require('fs'),
@@ -23,42 +25,129 @@ var fs = require('fs'),
 	Turbo = require("./turbo");
 
 /**
- * Simple Route Class
- */
+This object is attached to the request object on an incoming HTTP Request. It provides basic route data as well as some extended utility.
 
+	var route = req.route;
+
+@class Route
+@extends Class
+@static
+**/
 var Route = Class.$extend({
 
+	/**
+	Constructs a new Route Object. Should not be called directly.
+	
+	@private
+	@method __init__
+	@param {String} [pathname] The pathname portion of a URL.
+	**/
 	__init__: function(pathname) {
-		// Just some defaults to set later
+		
+		/**
+		The pathname portion of the current URL.
+		
+		@property pathname 
+		@type String
+		**/
 		this.pathname = pathname || "";
+		
+		/**
+		The string or regular expression used to match this URL. If it is a string, it should be the identical to `pathname`.
+		
+		@property handle 
+		@type String|RegExp
+		**/
 		this.handle = null;
+		
+		/**
+		The route type. This is usually defined and controlled by `Router.register_forward()`.
+		
+		@property type 
+		@type String
+		@default "system"
+		**/
 		this.type = "system";
+		
+		/**
+		Extra data associated with this Route including data found in a matching MongoDB document.
+		
+		@property data 
+		@type Mixed
+		**/
 		this.data = null;
+		
+		/**
+		Key/Value pair of parsed url segments. Only valid on system routes that use the Express.js route format.
+		
+		@property params 
+		@type Mixed
+		@example
+			Route.handle = "/some/:id/path"
+			Route.pathname = "/some/123/path"
+			Route.params = { id: 123 }
+		**/
 		this.params = {};
+		
+		/**
+		The match array produced when `pathname` is matched to a regular expression `handle`.
+		
+		@property match 
+		@type Array
+		**/
 		this.match = null;
 
 		// Render some segments if we can
 		this._render_segments();
 	},
 
+	/**
+	Retrieves the URL segment value at a specified key in `pathname`. Only valid on system routes that use the Express.js route format. Same as `this.params[key]`.
+	
+	@method param
+	@param {String} key The key to search for in `this.params`.
+	@return {String} The matched URL segment or undefined if not found.
+	**/
 	param: function(key) {
 		if (_.isObject(this.params) && _.has(this.params, key)) return this.params[key];
-		else return false;
 	},
 
+	/**
+	Retrieves the URL segment at specific index in `pathname`.
+	
+	@method segment
+	@param {Number} n The index of the segment to retrieve. The first index is 1.
+	@return {String} The matched URL segment or undefined if not found.
+	@example
+		Route.pathname = "/my/awesome/path"
+		Route.segment(2) -> "awesome"
+	**/
 	segment: function(n) {
 		n -= 1; // Normalize n
-		return this.segments[n] ? this.segments[n] : false;
+		return this.segments[n] ? this.segments[n] : undefined;
 	},
 	
+	/**
+	A quick method for redirecting the end user to an error page. This causes the same effect as `throw new Error()`.
+	
+	@method throw_error
+	@param {String} message The reason this error is being thrown.
+	@param {Number} [status=500] The HTTP status code associated with this error.
+	**/
 	throw_error: function(message, status) {
 		this.data.status = status || 500;
 		throw new Error(message);	
 	},
 
-	// Some "hidden" methods for constructing
+	/**
+	Sets `pathname`, `handle`, `type`, and `data` route properties.
 	
-	// Load some data
+	@private
+	@method _load
+	@param {String|Object} key The internal route key to set. If an object is given, this method is recursively called with it's keys/values.
+	@param {Mixed} value The value for the property. Ignored if `key` is an Object.
+	@chainable
+	**/
 	_load: function(key, value) {
 		if (_.isObject(key)) {
 			_.each(key, _.bind(function(v, k) {
@@ -76,13 +165,26 @@ var Route = Class.$extend({
 		return this;
 	},
 
-	// Render path segments
+	/**
+	Seperates `pathname` and stores segments into  `this.segments`. Internally uses `helper.depatherize()`.
+	
+	@private
+	@method _render_segments
+	**/
 	_render_segments: function() {
 		if (!this.pathname) return;
-		this.segments = _.compact(this.pathname.split("/"));
+		this.segments = helper.depatherize(this.pathname, "/", true);
 	},
 
-	// Load up a match
+	/**
+	This function takes an array of specified keys and a regular expression match array and combines them.
+	
+	@private
+	@method _load_params
+	@param {Array} keys An array of strings. Express will usually generate this when it parses a route.
+	@param {Array} match The regular expression match data. Each match index, `$n`, is paired to the `keys` index `[n-1]`.
+	@chainable
+	**/
 	_load_params: function(keys, match) {
 		// Validate
 		if (!_.isArray(keys) || !_.isArray(match)) throw new Error("Both arguments should be arrays.");
@@ -104,9 +206,21 @@ var Route = Class.$extend({
 });
 
 /**
- * Main Router Class
- */
+This object manages all traffic flow through Turbo. Technically, it's a complicated wrapper for Express.
 
+	var Router = require("turbo/route");	// Base Router Class
+	var router = Turbo.router;				// Main Router instance used by Turbo
+
+@class Router
+@extends Class
+@constructor
+@param {Object} options Base options to help the Router start.
+	@param {String} [options.logger='dev'] The [Connect logger middleware](http://www.senchalabs.org/connect/middleware-logger.html) log format.
+	@param {String} [options.collection='routes'] The name of the MongoDB collection that Router uses to store static routes. It is generally reccomended that you change this to prevent sharing data with other instances.
+	@param {Number} [options.port=9000] The port to start the new Express server on. If the port is taken, an exception is thrown.
+	@param {String} [options.cache_key='routes'] The namespace used for storing data in the cache. It is generally reccomended that you change this to prevent sharing data with other instances.
+	@param {Function} [options.error_handler] A function to execute if an exception is thrown. Works the same as Connect's error handling (see the [Express Guide on Error Handling](http://expressjs.com/guide.html#error-handling)) except `req.route` is an instance of `Route`.
+**/
 var Router = EventClass.$extend({
 
 	// Initialize
@@ -144,12 +258,26 @@ var Router = EventClass.$extend({
 		app.use(express.query());						// GET parser
 	},
 
+	/**
+	Loads Connect middleware using [Express#app.use()](http://expressjs.com/api.html#app.use). This method is destroyed when the server is started.
+	
+	@method use
+	@param {String} [path='/'] The path to mount the middleware.
+	@param {Function} middleware The Connect middleware function.
+	**/
 	// Load some middleware
 	// This function is destroyed on server start
 	use: function() {
 		return this.app.use.apply(this.app, arguments);
 	},
 
+	/**
+	Register a new Router forward. When the Router matches a route to a MongoDB document, it executes the forward that matches the document's `type`.
+	
+	@method register_forward
+	@param {String} type The exact type to match when comparing a static route.
+	@param {Function} callback The function to call when a document has this `type`.
+	**/
 	// Forwards are callbacks for paths in the database, matched by their type
 	register_forward: function(type, fnc) {
 		// Validate and push
@@ -165,7 +293,7 @@ var Router = EventClass.$extend({
 
 		// First, let's deal with the route.
 		// Is it a string? Convert to regex.
-		if (_.isString(route)) route = this._path_regex(this._clean_path(route), keys);
+		if (_.isString(route)) route = helper.path_regex(helper.patherize(route, "url"), keys);
 		if (!_.isRegExp(route)) throw new Error("First argument should be a path string or regex.");
 
 		// Compose and push the system route
@@ -174,20 +302,19 @@ var Router = EventClass.$extend({
 
 	// Finds the proper route and returns a route object
 	get_route: function(route) {
-		var p, R, sr, match, matches,
+		var p = promise.t(),
+			R = new Route(route),
+			clr, sr, match, matches,
 			params = {},
 			exactq = { handle: route },
 			fields = { _id: 0, type: 1, handle: 1, data: 1 };
 
-		// Load up a new promise
-		p = promise.t();
-
-		// Clean the route
-		route = this._clean_path(url.parse(route).pathname);
-		if (!route) return false;
-
-		// Create a new route object
-		R = new Route(route);
+		// Clean and validate the route
+		route = helper.patherize(url.parse(route).pathname, "route");
+		if (!route) return R._load("type", "error")._load("data", { title: "Bad Request", status: 400, message: "An invalid route was given." });
+		
+		// Reset the pathname in R in case it was changed.
+		R._load("pathname", route);
 
 		// First check system routes for a match
 		if (_.size(this.system_routes)) {
@@ -202,7 +329,7 @@ var Router = EventClass.$extend({
 				} else return false;
 			});
 
-			if (sr) return R._load(sr)._load("data", sr.callback);
+			if (sr) return R._load("type", "system")._load("handle", sr.handle)._load("data", sr.callback);
 		}
 
 		// Next check the database for a perfect match
@@ -362,44 +489,8 @@ var Router = EventClass.$extend({
 		this.server.close();
 		
 		this.trigger("close");
-	},
-
-	// Helper functions
-
-	// Tidy paths, Tyler style.
-	_clean_path: function(path) {
-		if (typeof path !== "string") return false;
-
-		path = path.trim();
-		while (path.substr(0,1) === "/") path = path.substr(1);
-		while (path.substr(-1) === "/") path = path.substr(0, path.length-1);
-		return "/" + path;
-	},
-
-	// String path to regex
-	// Same as express.js (https://github.com/visionmedia/express/blob/master/lib/utils.js#L262-L282)
-	_path_regex: function(path, keys, sensitive, strict) {
-		if (_.isRegExp(path)) return path;
-		if (_.isArray(path)) path = '(' + path.join('|') + ')';
-		path = path
-			.concat(strict ? '' : '/?')
-			.replace(/\/\(/g, '(?:/')
-			.replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g, function(_, slash, format, key, capture, optional, star){
-				keys.push({ name: key, optional: !! optional });
-				slash = slash || '';
-				return ''
-					+ (optional ? '' : slash)
-					+ '(?:'
-					+ (optional ? slash : '')
-					+ (format || '') + (capture || (format && '([^/.]+?)' || '([^/]+?)')) + ')'
-					+ (optional || '')
-					+ (star ? '(/*)?' : '');
-			})
-			.replace(/([\/.])/g, '\\$1')
-			.replace(/\*/g, '(.*)');
-		return new RegExp('^' + path + '$', sensitive ? '' : 'i');
 	}
-
+	
 });
 
 module.exports = Router;
