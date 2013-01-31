@@ -38,6 +38,7 @@ var Route = Class.$extend({
 	/**
 	Constructs a new Route Object. Should not be called directly.
 	
+	@private
 	@method __init__
 	@param {String} [pathname] The pathname portion of a URL.
 	**/
@@ -213,6 +214,12 @@ This object manages all traffic flow through Turbo. Technically, it's a complica
 @class Router
 @extends Class
 @constructor
+@param {Object} options Base options to help the Router start.
+	@param {String} [options.logger='dev'] The [Connect logger middleware](http://www.senchalabs.org/connect/middleware-logger.html) log format.
+	@param {String} [options.collection='routes'] The name of the MongoDB collection that Router uses to store static routes. It is generally reccomended that you change this to prevent sharing data with other instances.
+	@param {Number} [options.port=9000] The port to start the new Express server on. If the port is taken, an exception is thrown.
+	@param {String} [options.cache_key='routes'] The namespace used for storing data in the cache. It is generally reccomended that you change this to prevent sharing data with other instances.
+	@param {Function} [options.error_handler] A function to execute if an exception is thrown. Works the same as Connect's error handling (see the [Express Guide on Error Handling](http://expressjs.com/guide.html#error-handling)) except `req.route` is an instance of `Route`.
 **/
 var Router = EventClass.$extend({
 
@@ -251,12 +258,26 @@ var Router = EventClass.$extend({
 		app.use(express.query());						// GET parser
 	},
 
+	/**
+	Loads Connect middleware using [Express#app.use()](http://expressjs.com/api.html#app.use). This method is destroyed when the server is started.
+	
+	@method use
+	@param {String} [path='/'] The path to mount the middleware.
+	@param {Function} middleware The Connect middleware function.
+	**/
 	// Load some middleware
 	// This function is destroyed on server start
 	use: function() {
 		return this.app.use.apply(this.app, arguments);
 	},
 
+	/**
+	Register a new Router forward. When the Router matches a route to a MongoDB document, it executes the forward that matches the document's `type`.
+	
+	@method register_forward
+	@param {String} type The exact type to match when comparing a static route.
+	@param {Function} callback The function to call when a document has this `type`.
+	**/
 	// Forwards are callbacks for paths in the database, matched by their type
 	register_forward: function(type, fnc) {
 		// Validate and push
@@ -272,7 +293,7 @@ var Router = EventClass.$extend({
 
 		// First, let's deal with the route.
 		// Is it a string? Convert to regex.
-		if (_.isString(route)) route = this._path_regex(this._clean_path(route), keys);
+		if (_.isString(route)) route = helper.path_regex(helper.patherize(route, "url"), keys);
 		if (!_.isRegExp(route)) throw new Error("First argument should be a path string or regex.");
 
 		// Compose and push the system route
@@ -281,20 +302,19 @@ var Router = EventClass.$extend({
 
 	// Finds the proper route and returns a route object
 	get_route: function(route) {
-		var p, R, sr, match, matches,
+		var p = promise.t(),
+			R = new Route(route),
+			clr, sr, match, matches,
 			params = {},
 			exactq = { handle: route },
 			fields = { _id: 0, type: 1, handle: 1, data: 1 };
 
-		// Load up a new promise
-		p = promise.t();
-
-		// Clean the route
-		route = this._clean_path(url.parse(route).pathname);
-		if (!route) return false;
-
-		// Create a new route object
-		R = new Route(route);
+		// Clean and validate the route
+		route = helper.patherize(url.parse(route).pathname, "route");
+		if (!route) return R._load("type", "error")._load("data", { title: "Bad Request", status: 400, message: "An invalid route was given." });
+		
+		// Reset the pathname in R in case it was changed.
+		R._load("pathname", route);
 
 		// First check system routes for a match
 		if (_.size(this.system_routes)) {
@@ -309,7 +329,7 @@ var Router = EventClass.$extend({
 				} else return false;
 			});
 
-			if (sr) return R._load(sr)._load("data", sr.callback);
+			if (sr) return R._load("type", "system")._load("handle", sr.handle)._load("data", sr.callback);
 		}
 
 		// Next check the database for a perfect match
@@ -469,44 +489,8 @@ var Router = EventClass.$extend({
 		this.server.close();
 		
 		this.trigger("close");
-	},
-
-	// Helper functions
-
-	// Tidy paths, Tyler style.
-	_clean_path: function(path) {
-		if (typeof path !== "string") return false;
-
-		path = path.trim();
-		while (path.substr(0,1) === "/") path = path.substr(1);
-		while (path.substr(-1) === "/") path = path.substr(0, path.length-1);
-		return "/" + path;
-	},
-
-	// String path to regex
-	// Same as express.js (https://github.com/visionmedia/express/blob/master/lib/utils.js#L262-L282)
-	_path_regex: function(path, keys, sensitive, strict) {
-		if (_.isRegExp(path)) return path;
-		if (_.isArray(path)) path = '(' + path.join('|') + ')';
-		path = path
-			.concat(strict ? '' : '/?')
-			.replace(/\/\(/g, '(?:/')
-			.replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g, function(_, slash, format, key, capture, optional, star){
-				keys.push({ name: key, optional: !! optional });
-				slash = slash || '';
-				return ''
-					+ (optional ? '' : slash)
-					+ '(?:'
-					+ (optional ? slash : '')
-					+ (format || '') + (capture || (format && '([^/.]+?)' || '([^/]+?)')) + ')'
-					+ (optional || '')
-					+ (star ? '(/*)?' : '');
-			})
-			.replace(/([\/.])/g, '\\$1')
-			.replace(/\*/g, '(.*)');
-		return new RegExp('^' + path + '$', sensitive ? '' : 'i');
 	}
-
+	
 });
 
 module.exports = Router;

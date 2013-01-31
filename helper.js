@@ -120,7 +120,7 @@ Generates a new RFC4122 v4 universally unique identifier. Internally uses [node-
 
 @method generate_uuid
 
-@return {String} A universly unique string of 32 character long.
+@return {String} A new RFC4122 v4 universally unique identifier.
 **/
 var generate_uuid = module.exports.generate_uuid = function() {
 	return uuid.v4();
@@ -149,8 +149,16 @@ var patherize = module.exports.patherize = function( segments, options ) {
 	
 	var defs = {
 		"cache": { sep: "::", root: false },
-		"url": { strict: true },
-		"file": {}
+		"url": { match: function(s) { return s ? true : false; } },
+		"route": {
+			match: function(s) {
+				if (!s) return false;
+				var match = s.match(/([^a-z0-9\-\.\_~\!\$\&'\(\)\*\+,;=%]|%(?![a-f0-9]{2}))/i);
+				return match ? false : true;
+			},
+			strict: true
+		},
+		"file": { strict: true, match: function(s) { return s ? true : false; } }
 	}
 	
 	if (_.isString(options) && _.has(defs, options)) options = defs[options];
@@ -231,4 +239,38 @@ var depatherize = module.exports.depatherize = function( path, sep, strict ) {
 	// If strict, just return what we found, otherwise compact the array
 	if (strict) return segments;
 	else return _.compact(segments);
+}
+
+/**
+Normalize the given path string, returning a regular expression. Same as [Express's route parser](https://github.com/visionmedia/express/blob/master/lib/utils.js#L262-L282).
+
+@method path_regex
+
+@param {String|RegExp|Array} path The path to normalize.
+@param {Array} keys An empty array which will contain the placeholder key names. For example, the path `"/user/:id"` will then contain `["id"]`.
+@param {Boolean} [sensitive=false] If false, the RegExp flag `i` is set to signal a case-insensitive path.
+@param {Boolean} [strict=false] If false, will match the same path ending in '/'.
+
+@return {RegExp} A regular expression to match other paths too.
+**/
+var path_regex = module.exports.path_regex = function(path, keys, sensitive, strict) {
+	if (_.isRegExp(path)) return path;
+	if (_.isArray(path)) path = '(' + path.join('|') + ')';
+	path = path
+		.concat(strict ? '' : '/?')
+		.replace(/\/\(/g, '(?:/')
+		.replace(/(\/)?(\.)?:(\w+)(?:(\(.*?\)))?(\?)?(\*)?/g, function(_, slash, format, key, capture, optional, star){
+			keys.push({ name: key, optional: !! optional });
+			slash = slash || '';
+			return ''
+				+ (optional ? '' : slash)
+				+ '(?:'
+				+ (optional ? slash : '')
+				+ (format || '') + (capture || (format && '([^/.]+?)' || '([^/]+?)')) + ')'
+				+ (optional || '')
+				+ (star ? '(/*)?' : '');
+		})
+		.replace(/([\/.])/g, '\\$1')
+		.replace(/\*/g, '(.*)');
+	return new RegExp('^' + path + '$', sensitive ? '' : 'i');
 }

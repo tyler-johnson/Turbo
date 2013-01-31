@@ -28,8 +28,9 @@ Manages third-party extensions. Only one instance is created per application and
 var Plugins = Class.$extend({
 
 	/**
-	Constructs a new Plugin Object. Cannot (and should not) be called directly.
+	Constructs a new Plugin Object. Should not be called directly.
 	
+	@private
 	@method __init__
 	@param {String} directory A path to the main plugin directory.
 	@param {Object} options
