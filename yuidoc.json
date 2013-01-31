@@ -1,0 +1,15 @@
+{
+    "name": "Turbo",
+    "description": "A content management platform for Node.js.",
+    "version": "0.2.2alpha",
+    "url": "https://github.com/appleifreak/Turbo",
+    "options": {
+        "linkNatives": "true",        
+        "attributesEmit": "false",
+        "selleck": "false",
+        "ignorePaths": [ "node_modules", "docs" ],
+        "exclude": "theme/assets, startup.js, connect.js",
+        "paths": "*/js",
+        "outdir": "./docs"
+    }
+}

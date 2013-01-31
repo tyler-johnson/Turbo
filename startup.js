@@ -1,3 +1,8 @@
+/*
+This file loads everything into the main Turbo instance.
+It also prepares Turbo for shutdown.
+*/
+
 // Load some major dependencies
 var express = require('express'),
 	promise = require('fibers-promise'),

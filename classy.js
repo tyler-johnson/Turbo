@@ -1,12 +1,25 @@
+/**
+@module Turbo
+**/
+
+/* Major Dependencies */
+
+	// Node
 var EventEmitter = require('events').EventEmitter,
-	_ = require("underscore");
+
+	// JS Extensions
+	_ = require('underscore');
+	
+	// Specific
+	// None
 
 /**
- * Classy - classy classes for JavaScript
- *
- * :copyright: (c) 2011 by Armin Ronacher. 
- * :license: BSD.
- */
+The base class for all Turbo classes. This is actually [Classy](http://classy.pocoo.org/). Go there for licenses, copyright and documentation.
+
+	var Class = require("turbo/classy").Class;
+
+@class Class
+*/
 
 var Class = module.exports.Class = (function () {
 	var CLASSY_VERSION = '1.4',
@@ -158,6 +171,14 @@ var Class = module.exports.Class = (function () {
 	/* export the class */
 	return Class;
 })();
+
+/**
+An extendable event class that combines Classy and EventEmitter. Make sure to call `this.$super();` in your custom constructor to ensure that events are set up properly.
+
+	var EventClass = require("turbo/classy").EventClass;
+
+@class EventClass
+*/
 
 module.exports.EventClass = Class.$extend({
 	__init__: function(maxListeners) {

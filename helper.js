@@ -1,8 +1,12 @@
-// This file provides general helper functions
-
 /**
- * Major dependencies
- */
+Provides Turbo with general helper functions. All methods are attached directly to `module.exports`.
+
+	var helper = require('turbo/helper');
+
+@class helper
+**/
+
+/* Major Dependencies */
 
 	// Node
 var // None
@@ -12,14 +16,89 @@ var // None
 	sugar = require('sugar'),
 	
 	// Specific
-	promise = require('fibers-promise'),
-	Turbo = require('./turbo');
-	
+	promise = require('fibers-promise');
+
 /**
- * rand_hex( int n )
- *
- * Generates a random hexadecimal string of n digits long
- */
+Parses `options` according to `rules` and returns an adjusted copy.
+
+@method parse_options
+
+@param {Object} options The options to parse. Should be in standard key, value format.
+@param {Object} rules Rules the `options` should follow. Values in `rules` can be either an Object or Array. Each has different use.
+	@param {Object} rules.nested_rules If a `rule` value is an object and the `options` value is an object, this method recursively calls itself on these objects.
+	@param {Array} rules.rule If a `rule` value is an array, it is tested against `options`.
+		@param {String} rules.rule.0 The first value in the array is the type to match to the current `options` value by.
+		@param {Mixed} rules.rule.1 The second value in the array is the default value to use if an incorrect type is found.
+		@param {Boolean} [rules.rule.2] The third value in the array tells this method to throw an Error if an incorrect type is found. Set the second array value to null if this is true.
+		
+@return {Object} An object similar to `options`, adjusted to match `rules`.
+
+@example
+	var options = {
+		TEST: {
+			FOO: "BAR"
+		},
+		PARAM: true
+	};
+	
+	var rules = {
+		TEST: {
+			FOO: ["string", "default"],
+			OTHER: ["number", 100]
+		}
+		PARAM: ["boolean", null, true]
+	}
+	
+	var config = helper.parse_options(options, rules);
+	
+The above example returns:
+
+	{
+		TEST: {
+			FOO: "BAR",
+			OTHER: 100
+		},
+		PARAM: true
+	}	
+**/
+var parse_options = module.exports.parse_options = function(options, def) {
+	var fine = {};
+	
+	// Validate
+	if (typeof options !== "object") throw new Error("Invalid options argument.");
+
+	// Loop through the default object
+	_.each(def, function(item, key) {
+		// Array? Then it wants to set up.
+		if (item instanceof Array && item.length >= 2) {
+			// Check if options has the key and is the right type; use that
+			if (_.has(options, key) && typeof options[key] === item[0]) fine[key] = options[key];
+
+			// Check if the third parameter is true -> get out
+			else if (item[2] === true) throw new Error("Option `"+key+"` is not the right type.");
+			
+			// Otherwise, load the default
+			else  fine[key] = item[1];
+
+		// Otherwise its an object of more keys
+		} else if (typeof def[key] === "object" && typeof options[key] === "object") fine[key] = parse_options(options[key], def[key]);
+
+		// Not an object? Get outta here.
+		else throw new Error("Invalid default.");
+	});
+	
+	return fine;
+}
+
+/**
+Generates a random hexadecimal string of n digits long.
+
+@method rand_hex
+
+@param {Number} n The length of the returned hexadecimal string.
+
+@return {String} A random hexadecimal string.
+**/
 var rand_hex = module.exports.rand_hex = function( n ) {
 	if (!n) n = 6;
 	var val = "";
@@ -32,13 +111,15 @@ var rand_hex = module.exports.rand_hex = function( n ) {
 }
 
 /**
- * generate_uuid( )
- *
- * Generates a new unique identifier. Holds a cache to gaurantee uniqueness.
- * This should only be used for uuid that can be lost on server stop because the cache may be cleared on start.
- */
+Generates a new unique identifier. Holds a cache to gaurantee uniqueness. This should only be used for uuid that can be lost on server stop because the cache may be cleared on start.
+
+@method generate_uuid
+
+@return {String} A universly unique string of 32 character long.
+**/
 var generate_uuid = module.exports.generate_uuid = function() {
 	var p = promise.t(),
+		Turbo = require('./turbo'),
 		cache = Turbo.redis,
 		uuid = rand_hex(32),
 		valid = false;
@@ -54,22 +135,30 @@ var generate_uuid = module.exports.generate_uuid = function() {
 }
 
 /**
- * patherize( array/string segments, object options )
- *
- * Takes a string or array of strings and converts it into a usable path
- *
- * Options:
- * sep (string) [/] : Path seperator
- * root (bool) [true] : Include the root seperator
- * strict (bool) [false] : Returns null on invalid parts instead of skipping
- * match (regex or function) [sugarjs dasherize] : regex or function to test a segment for validity or replace it
- */
+Takes a string or array of strings and converts it into a usable path.
+
+@method patherize
+
+@param {Array|String} segments An array of segments to join together into a path. If a string is given, it is first run through the inverse of this function: `depatherize()`.
+@param {Object|String} options If options is an Object, it is used in place of the defaults. If a string is given, this method will search for it in a set of preset option keys. Currently, there are three presets: `cache`, `file`, and `url`.
+	@param {String} [options.sep=/] A string to seperate segments by.
+	@param {Boolean} [options.root=true] Include a seperator at the beginning of the path.
+	@param {Boolean} [options.strict=false] If true, returns null on invalid parts instead of skipping over.
+	@param {RegExp|Function} [options.match] If a regular expression is found, it is matched against each segment for validity. If a function is found, it is called on each segment individually. If it returns a string, the segment is replaced by it. Otherwise, the function's return value is evaluated to be true or false. This options defaults to a function that returns a [SugarJS Parameterized](http://sugarjs.com/api/String/parameterize) string.
+	
+@return {String} A usuable path
+
+@example
+	helper.patherize("//my/really/screwed)(*&\\\\^%$#@Q!/path/") // /my/really/screwed/path
+	helper.patherize(["my","super","cache","path"], "cache") // my::super::cache::path
+**/
 var patherize = module.exports.patherize = function( segments, options ) {
 	var loop;
 	
 	var defs = {
 		"cache": { sep: "::", root: false },
-		"filesystem": {}
+		"url": { strict: true },
+		"file": {}
 	}
 	
 	if (_.isString(options) && _.has(defs, options)) options = defs[options];
@@ -119,15 +208,20 @@ var patherize = module.exports.patherize = function( segments, options ) {
 }
 
 /**
- * depatherize( string path, string sep, bool strict )
- *
- * Takes a string and seperates it into an array of segments
- *
- * Arguments:
- * sep (string) [/] : Path seperator
- * strict (bool) [false] : Returns a segment even if it is blank
- */
+Takes a string and seperates it into an array of segments. The inverse of this method is [patherize()]({{#crossLinkRaw "Helper/patherize:method"}}{{/crossLinkRaw}})
 
+@method depatherize
+
+@param {String} path A string that needs to be seperated into basic segments.
+@param {String} [sep=/] A string to split the `path` by.
+@param {Boolean} [strict=false] If true, it keeps any segments that would normally evaluate to false. 
+
+@return {Array} The original path, split into an array of strings.
+
+@example
+	helper.depatherize("//my/really/screwed)(*&\\\\^%$#@Q!/path/", "/", true) // ["", "my", "really", "screwed)(*&\\\\^%$#@Q!", "path"]
+	helper.depatherize("my::super::cache::path", "::") // ["my","super", "cache", "path"]
+**/
 var depatherize = module.exports.depatherize = function( path, sep, strict ) {
 	// Validate
 	if (!_.isString(path)) throw new Error("Path should be a string.");
