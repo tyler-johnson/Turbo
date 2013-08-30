@@ -256,6 +256,11 @@ var Router = EventClass.$extend({
 		app.use(express.logger(this.options.logger));	// Basic logging
 		app.use(express.bodyParser());					// REQUEST parser
 		app.use(express.query());						// GET parser
+
+		// Sessions
+		var RedisStore = require('connect-redis')(express);
+		app.use(express.cookieParser());
+		app.use(express.session({ store: new RedisStore({ client: Turbo.redis }), secret: 'i57q7s232m5b8ys18s5w5s8dev721e0m' }));
 	},
 
 	/**
